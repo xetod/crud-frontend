@@ -18,6 +18,7 @@ function App() {
           <Routes>
             {/* Define a route for the main component */}
             <Route exact path="/" element={<Main />} />
+            <Route exact path="/new-customer" element={<Main />} />
           </Routes>
         </BrowserRouter>
       </AppStateProvider>
