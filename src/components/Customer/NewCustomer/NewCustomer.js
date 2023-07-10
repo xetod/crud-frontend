@@ -4,7 +4,8 @@ import { Form, Button } from "react-bootstrap";
 import * as yup from "yup";
 import AppStateContext from "../../../context/AppStateContext";
 import { createCustomer } from "../../../services"
-import Sales from "./Sales";
+import Customer from "../Customer/Customer";
+import  Sale from "../Sale/Sale";
 
 function NewCustomer() {
     const navigate = useNavigate();
@@ -30,6 +31,7 @@ function NewCustomer() {
         sales: {},
     });
 
+
     const schema = yup.object().shape({
         firstName: yup.string().required("First name is required"),
         lastName: yup.string().required("Last name is required"),
@@ -49,6 +51,7 @@ function NewCustomer() {
             )
     });
 
+
     const handleChange = (event, index) => {
         const { name, value } = event.target;
         if (name === "productId" || name === "quantity" || name === "date" || name === "unitPrice" || name === "totalPrice") {
@@ -66,7 +69,7 @@ function NewCustomer() {
                 ...prevFormData,
                 [name]: value,
             }));
-        }   
+        }
     };
 
 
@@ -104,12 +107,14 @@ function NewCustomer() {
         setSubmitting(false);
     };
 
+
     const handleAddSale = () => {
         setFormData((prevFormData) => ({
             ...prevFormData,
             sales: [...prevFormData.sales, { productId: 0 }],
         }));
     };
+
 
     const handleRemoveSale = (index) => {
         setFormData((prevFormData) => {
@@ -122,89 +127,22 @@ function NewCustomer() {
         });
     };
 
+
     const handleCancel = () => {
         navigate("/");
     };
 
+    
     return (
         <Form onSubmit={handleSubmit}>
-            <Form.Group controlId="formFirstName">
-                <Form.Label>First Name</Form.Label>
-                <Form.Control
-                    type="text"
-                    name="firstName"
-                    placeholder="Enter first name"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    isInvalid={!!errors.firstName}
-                />
-                <Form.Control.Feedback type="invalid">
-                    {errors.firstName}
-                </Form.Control.Feedback>
-            </Form.Group>
-
-            <Form.Group controlId="formLastName">
-                <Form.Label>Last Name</Form.Label>
-                <Form.Control
-                    type="text"
-                    name="lastName"
-                    placeholder="Enter last name"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    isInvalid={!!errors.lastName}
-                />
-                <Form.Control.Feedback type="invalid">
-                    {errors.lastName}
-                </Form.Control.Feedback>
-            </Form.Group>
-
-            <Form.Group controlId="formEmail">
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                    type="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    isInvalid={!!errors.email}
-                />
-                <Form.Control.Feedback type="invalid">
-                    {errors.email}
-                </Form.Control.Feedback>
-            </Form.Group>
-
-            <Form.Group controlId="formAddress">
-                <Form.Label>Address</Form.Label>
-                <Form.Control
-                    type="text"
-                    name="address"
-                    placeholder="Enter your address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    isInvalid={!!errors.address}
-                />
-                <Form.Control.Feedback type="invalid">
-                    {errors.address}
-                </Form.Control.Feedback>
-            </Form.Group>
-
-            <Form.Group controlId="formPhoneNumber">
-                <Form.Label>Phone Number</Form.Label>
-                <Form.Control
-                    type="text"
-                    name="phoneNumber"
-                    placeholder="Enter your phone number"
-                    value={formData.phoneNumber}
-                    onChange={handleChange}
-                    isInvalid={!!errors.phoneNumber}
-                />
-                <Form.Control.Feedback type="invalid">
-                    {errors.phoneNumber}
-                </Form.Control.Feedback>
-            </Form.Group>
-
-            <Sales
-                sales={formData.sales}
+            <Customer
+                formData={formData}
+                errors={errors}
+                handleChange={handleChange}
+            />
+            
+            <Sale
+                sales={formData.sales ? formData.sales : []}
                 products={products}
                 errors={errors}
                 submitting={submitting}
@@ -212,92 +150,6 @@ function NewCustomer() {
                 handleAddSale={handleAddSale}
                 handleRemoveSale={handleRemoveSale}
             />
-
-            {/* <Form.Group controlId="formSales">
-                <Form.Label>Sales</Form.Label>
-                {formData.sales.map((sale, index) => (
-                    <Row key={index}>
-                        <Col>
-                            <Form.Control
-                                as="select"
-                                name="productId"
-                                value={sale.productId}
-                                onChange={(event) => handleChange(event, index)}
-                                isInvalid={!!errors[`sales[${index}].productId`]}
-                            >
-                                <option value={0}>Select a product</option>
-                                {formData.products.map((product) => (
-                                    <option key={product.productId} value={product.productId}>
-                                        {product.productName}
-                                    </option>
-                                ))}
-                            </Form.Control>
-                            <Form.Control.Feedback type="invalid">
-                                {errors[`sales[${index}].productId`]}
-                            </Form.Control.Feedback>
-                        </Col>
-                        <Col xs="auto">
-                            <Form.Control
-                                type="number"
-                                name="quantity"
-                                value={sale.quantity}
-                                onChange={(event) => handleChange(event, index)}
-                                isInvalid={!!errors[`sales[${index}].quantity`]}
-                                min="0"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                                {errors[`sales[${index}].quantity`]}
-                            </Form.Control.Feedback>
-                        </Col>
-                        <Col xs="auto">
-                            <Form.Control
-                                type="number"
-                                name="unitPrice"
-                                value={sale.unitPrice}
-                                onChange={(event) => handleChange(event, index)}
-                                isInvalid={!!errors[`sales[${index}].unitPrice`]}
-                                min="0"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                                {errors[`sales[${index}].unitPrice`]}
-                            </Form.Control.Feedback>
-                        </Col>
-                        <Col xs="auto">
-                            <Form.Control
-                                type="number"
-                                name="totalPrice"
-                                value={sale.totalPrice}
-                                onChange={(event) => handleChange(event, index)}
-                                isInvalid={!!errors[`sales[${index}].totalPrice`]}
-                                min="0"
-                            />
-                            <Form.Control.Feedback type="invalid">
-                                {errors[`sales[${index}].totalPrice`]}
-                            </Form.Control.Feedback>
-                        </Col>
-                        <Col xs="auto">
-                            {index === formData.sales.length - 1 && (
-                                <Button
-                                    variant="secondary"
-                                    onClick={handleAddSale}
-                                    disabled={submitting}
-                                >
-                                    Add
-                                </Button>
-                            )}
-                            {index !== formData.sales.length - 1 && (
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => handleRemoveSale(index)}
-                                    disabled={submitting}
-                                >
-                                    Remove
-                                </Button>
-                            )}
-                        </Col>
-                    </Row>
-                ))}
-            </Form.Group> */}
 
             <Button variant="primary" type="submit" disabled={submitting}>
                 {submitting ? "Submitting..." : "Submit"}
