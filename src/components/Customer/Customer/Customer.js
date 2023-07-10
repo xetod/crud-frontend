@@ -1,10 +1,11 @@
 import React from "react";
 import { Form } from "react-bootstrap";
+import styles from "./Customer.module.css";
 
 function Customer({ formData, errors, handleChange }) {
     return (
         <div>
-            <Form.Group controlId="formFirstName">
+            <Form.Group controlId="formFirstName" className={styles.divider}>
                 <Form.Label>First Name</Form.Label>
                 <Form.Control
                     type="text"
@@ -19,7 +20,7 @@ function Customer({ formData, errors, handleChange }) {
                 </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group controlId="formLastName">
+            <Form.Group controlId="formLastName" className={styles.divider}>
                 <Form.Label>Last Name</Form.Label>
                 <Form.Control
                     type="text"
@@ -34,7 +35,7 @@ function Customer({ formData, errors, handleChange }) {
                 </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group controlId="formEmail">
+            <Form.Group controlId="formEmail" className={styles.divider}>
                 <Form.Label>Email</Form.Label>
                 <Form.Control
                     type="email"
@@ -49,7 +50,7 @@ function Customer({ formData, errors, handleChange }) {
                 </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group controlId="formAddress">
+            <Form.Group controlId="formAddress" className={styles.divider}>
                 <Form.Label>Address</Form.Label>
                 <Form.Control
                     type="text"
@@ -64,7 +65,7 @@ function Customer({ formData, errors, handleChange }) {
                 </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group controlId="formPhoneNumber">
+            <Form.Group controlId="formPhoneNumber" className={styles.divider}>
                 <Form.Label>Phone Number</Form.Label>
                 <Form.Control
                     type="text"

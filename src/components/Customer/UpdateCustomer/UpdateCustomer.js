@@ -1,18 +1,20 @@
-import React, { useContext, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 import * as yup from "yup";
 import AppStateContext from "../../../context/AppStateContext";
-import { createCustomer } from "../../../services"
+import { createCustomer, getCustomer, updateCustomer } from "../../../services"; // Assuming you have a service function to get products
 import Customer from "../Customer/Customer";
 import Sale from "../Sale/Sale";
-import styles from "./NewCustomer.module.css";
+import styles from "./UpdateCustomer.module.css";
 
-function NewCustomer() {
+function UpdateCustomer() {
     const navigate = useNavigate();
+    const location = useLocation();
     const { state } = useContext(AppStateContext);
     const { products } = state;
     const [formData, setFormData] = useState({
+        customerId: 0,
         firstName: "",
         lastName: "",
         email: "",
@@ -20,18 +22,18 @@ function NewCustomer() {
         phoneNumber: "",
         sales: [
             {
+                saleId: 0,
                 productId: 0,
                 quantity: 0,
                 unitPrice: 0,
                 totalPrice: 0,
             },
-        ]
+        ],
     });
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({
         sales: {},
     });
-
 
     const schema = yup.object().shape({
         firstName: yup.string().required("First name is required"),
@@ -39,33 +41,73 @@ function NewCustomer() {
         email: yup.string().email("Invalid email").required("Email is required"),
         address: yup.string().required("Address is required"),
         phoneNumber: yup.string().required("Phone number is required"),
-        sales: yup
-            .array(
-                yup.object().shape({
-                    productId: yup.number()
-                        .required("Product name is required")
-                        .min(1, "Product should be selected."),
-                    quantity: yup.number()
-                        .required("Quantity is required")
-                        .min(1, "Quantity must be greater than zero")
-                })
-            )
+        sales: yup.array(
+            yup.object().shape({
+                productId: yup
+                    .number()
+                    .required("Product name is required")
+                    .min(1, "Product should be selected."),
+                quantity: yup
+                    .number()
+                    .required("Quantity is required")
+                    .min(1, "Quantity must be greater than zero"),
+            })
+        ),
     });
 
+    useEffect(() => {
+        async function fetchCustomer() {
+            try {
+                // Make the API call to fetch customer data from the server
+                const response = await getCustomer(location.state?.customerId); // Replace 'getCustomerData' with the actual API call
+
+                if (response) {
+                    const { customerId, firstName, lastName, email, address, phoneNumber, sales } = response;
+
+                    // Update the form data with the fetched values
+                    setFormData((prevFormData) => ({
+                        ...prevFormData,
+                        customerId,
+                        firstName,
+                        lastName,
+                        email,
+                        address,
+                        phoneNumber,
+                        sales: sales.map((sale) => ({
+                            saleId: sale.saleId,
+                            productId: sale.productId,
+                            quantity: sale.quantity,
+                            unitPrice: sale.unitPrice,
+                            totalPrice: sale.totalPrice,
+                        })),
+                    }));
+                }
+            } catch (error) {
+                console.error("Error fetching customer data:", error);
+            }
+        }
+
+        fetchCustomer();
+    }, [location.state?.customerId]);
 
     const handleChange = (event, index) => {
         const { name, value } = event.target;
-        if (name === "productId" || name === "quantity" || name === "date" || name === "unitPrice" || name === "totalPrice") {
+        if (
+            name === "productId" ||
+            name === "quantity" ||
+            name === "date" ||
+            name === "unitPrice" ||
+            name === "totalPrice"
+        ) {
             const sales = [...formData.sales];
             sales[index] = {
                 ...sales[index],
                 [name]: value ?? 0,
-                totalPrice: name === "quantity" ? value * sales[index].unitPrice : sales[index].quantity * value,
             };
             setFormData((prevFormData) => ({
                 ...prevFormData,
                 sales,
-            }));  
+            }));
         } else {
             setFormData((prevFormData) => ({
                 ...prevFormData,
@@ -73,7 +115,6 @@ function NewCustomer() {
             }));
         }
     };
-
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -85,13 +126,13 @@ function NewCustomer() {
             // Validate form
             await schema.validate(formData, { abortEarly: false });
 
-            // Perform form submission to the server
-            var response = await createCustomer(formData);
+            var response = location.state?.customerId
+                ? await updateCustomer(formData, location.state?.customerId)
+                : await createCustomer(formData);
+
             // Handle the response from the server
             if (response.success) {
                 navigate("/", { state: { success: true } });
-            } else {
-                console.log("Form submission failed");
             }
         } catch (error) {
             if (error instanceof yup.ValidationError) {
@@ -100,8 +141,6 @@ function NewCustomer() {
                     validationErrors[err.path] = err.message;
                 });
                 setErrors(validationErrors);
-            } else {
-                console.error("Form submission error:", error);
             }
         }
 
@@ -109,14 +148,12 @@ function NewCustomer() {
         setSubmitting(false);
     };
 
-
     const handleAddSale = () => {
         setFormData((prevFormData) => ({
             ...prevFormData,
             sales: [...prevFormData.sales, { productId: 0 }],
         }));
     };
-
 
     const handleRemoveSale = (index) => {
         setFormData((prevFormData) => {
@@ -129,11 +166,9 @@ function NewCustomer() {
         });
     };
 
-
     const handleCancel = () => {
         navigate("/");
     };
-
 
     return (
         <div className={styles.roundedFormBorder}>
@@ -145,7 +180,7 @@ function NewCustomer() {
                 />
 
                 <Sale
-                    sales={formData.sales ? formData.sales : []}
+                    sales={formData.sales}
                     products={products}
                     errors={errors}
                     submitting={submitting}
@@ -153,7 +188,6 @@ function NewCustomer() {
                     handleAddSale={handleAddSale}
                     handleRemoveSale={handleRemoveSale}
                 />
-
                 <div className={styles.topDivider}>
                     <Button variant="primary" type="submit" disabled={submitting}>
                         {submitting ? "Submitting..." : "Submit"}
@@ -167,4 +201,4 @@ function NewCustomer() {
     );
 }
 
-export default NewCustomer;
+export default UpdateCustomer;

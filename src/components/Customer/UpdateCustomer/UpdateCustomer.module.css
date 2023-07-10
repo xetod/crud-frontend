@@ -1,0 +1,14 @@
+.roundedFormBorder {
+    border: 0.1rem solid #1f1c3f; 
+    border-radius: 1rem;
+    padding: 2.5rem;
+    background-color: #f0f0f0; 
+  }
+  
+  .topDivider {
+    margin-top: 1rem;
+  }  
+  
+  .leftDivider {
+    margin-left: 0.3rem;
+  }
