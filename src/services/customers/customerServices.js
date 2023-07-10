@@ -1,4 +1,4 @@
-const fetchCustomers = async ({ dispatch, currentPage, searchText = "" }) => {
+const getCustomers = async ({ dispatch, currentPage, searchText = "" }) => {
     dispatch({ type: "FETCH_START" });
 
     const params = new URLSearchParams({
@@ -13,6 +13,15 @@ const fetchCustomers = async ({ dispatch, currentPage, searchText = "" }) => {
         dispatch({ type: "FETCH_CUSTOMERS_SUCCESS", payload: data });
     } catch (error) {
         dispatch({ type: "FETCH_ERROR", payload: error.message });
+    }
+};
+
+const getCustomer = async (customerId) => {
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/customers/${customerId}`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
     }
 };
 
@@ -39,4 +48,28 @@ const createCustomer = async (formData) => {
     }
 };
 
-export { fetchCustomers, createCustomer };
+const updateCustomer = async (formData, customerId) => {
+    try {
+        console.log(formData, customerId);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/customers/${customerId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        });
+
+        // Check if the request was successful (status 2xx)
+        if (response.ok) {
+            // Return the response
+            return { success: true };
+        } else {
+            throw new Error("Request failed with status: " + response.status);
+        }
+    } catch (error) {
+        // Rethrow the error to the callee
+        throw error;
+    }
+};
+
+export { getCustomers, createCustomer, getCustomer, updateCustomer };

@@ -1,4 +1,4 @@
-import { fetchCustomers, createCustomer } from './customers/customerServices';
+import { getCustomers, createCustomer, getCustomer, updateCustomer } from './customers/customerServices';
 import fetchProducts from './products/products';
 
-export { fetchCustomers, createCustomer, fetchProducts };
+export { getCustomers, createCustomer, fetchProducts, getCustomer, updateCustomer };
