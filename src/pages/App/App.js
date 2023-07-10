@@ -1,6 +1,7 @@
-import { Route, Routes, BrowserRouter } from 'react-router-dom';
+import { Route, Routes, BrowserRouter } from "react-router-dom";
 import Main from "../Main/Main";
 import AppStateProvider from "../../context/AppStateProvider";
+import NewCustomer from "../../components/Customer/NewCustomer/NewCustomer";
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
           <Routes>
             {/* Define a route for the main component */}
             <Route exact path="/" element={<Main />} />
-            <Route exact path="/new-customer" element={<Main />} />
+            <Route exact path="/new-customer" element={<NewCustomer />} />
           </Routes>
         </BrowserRouter>
       </AppStateProvider>

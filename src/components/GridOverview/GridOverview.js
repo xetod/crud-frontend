@@ -1,20 +1,37 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Table, Button, Badge, Spinner } from "react-bootstrap";
+import { Table, Button, Badge, Spinner, Alert } from "react-bootstrap";
 import styles from "./GridOverview.module.css";
 import AppStateContext from "../../context/AppStateContext";
+import { useLocation } from "react-router-dom";
 
 const GridOverview = () => {
-  const navigate = useNavigate();
+  const location = useLocation();
   const [currentPage, setCurrentPage] = useState(1);
-
+  const [saveAlert, setSaveAlert] = useState(false);
   const { state, getCustomers } = useContext(AppStateContext);
-  const { data, loading, error } = state;
+  const { customers, loading } = state;
 
   useEffect(() => {
     // Fetch customers when the component mounts
     getCustomers({ currentPage: currentPage });
   }, []);
+
+  useEffect(() => {
+    let timer;
+    if (location.state?.success) {
+      setSaveAlert(true);
+
+      timer = setTimeout(() => {
+        setSaveAlert(false);
+        // Set success to false after 8 seconds
+      }, 3000);
+    }
+    return () => {
+      window.history.replaceState({}, document.title);
+
+      clearTimeout(timer);
+    };
+  }, [location.state?.success]);
 
   const handlePageChange = (currentPage) => {
     // Update the current page and fetch customers
@@ -24,7 +41,7 @@ const GridOverview = () => {
 
   const handleEditCustomer = (customerId) => {
     // Log the customer ID
-    console.log(customerId);
+    console.log(location);
   };
 
   return (
@@ -36,9 +53,14 @@ const GridOverview = () => {
             <span className="visually-hidden">Loading...</span>
           </Spinner>
         </div>
-      ) : data && data.results.length > 0 ? (
+      ) : customers && customers.results.length > 0 ? (
         // Render the table if data is available
         <div>
+          {saveAlert && (
+            <Alert variant="info" className={styles.alert} dismissible>
+              Data sent to server successfully. 
+            </Alert>
+          )}
           <Table striped bordered>
             <thead>
               <tr>
@@ -50,7 +72,7 @@ const GridOverview = () => {
               </tr>
             </thead>
             <tbody>
-              {data && data.results.map((item) => (
+              {customers && customers.results.map((item) => (
                 // Render a row for each customer
                 <tr key={item.customerId}>
                   <td>{item.firstName}</td>
@@ -75,7 +97,7 @@ const GridOverview = () => {
             </tbody>
           </Table>
           <div>
-            {Array.from({ length: data && data.pagination.totalPages }, (_, index) => index + 1).map(
+            {Array.from({ length: customers && customers.pagination.totalPages }, (_, index) => index + 1).map(
               (pageNumber) => (
                 // Render pagination buttons
                 <Button
