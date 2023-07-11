@@ -24,7 +24,6 @@ const mockAppStateContextValue = {
     }
 };
 
-
 const setupRouter = () => {
     const router = createMemoryRouter(
         [
@@ -49,12 +48,6 @@ beforeEach(() => {
 })
 
 const navigate = jest.fn();
-
-// jest.mock("react-router-dom", () => ({
-//     ...jest.requireActual("react-router-dom"),
-//     useNavigate: jest.fn(),
-// }));
-
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual("react-router-dom"),
@@ -193,16 +186,16 @@ describe("UpdateCustomer", () => {
 
 
         fireEvent.change(screen.getAllByTestId("product")[0], { target: { value: "1" } });
-        fireEvent.change(screen.getAllByTestId("quantity")[0], { target: { value: "1" } });
-        fireEvent.change(screen.getAllByTestId("unitPrice")[0], { target: { value: "1" } });
-        fireEvent.change(screen.getAllByTestId("totalPrice")[0], { target: { value: "1" } });
+        fireEvent.change(screen.getAllByTestId("quantity")[0], { target: { value: 1 } });
+        fireEvent.change(screen.getAllByTestId("unitPrice")[0], { target: { value: 1 } });
+        fireEvent.change(screen.getAllByTestId("totalPrice")[0], { target: { value: 1 } });
 
         fireEvent.click(screen.getByText("Submit"));
 
         await waitFor(() => expect(updateCustomer).toHaveBeenCalled());
 
         expect(updateCustomer).toHaveBeenCalledWith({
-            customerId:1,
+            customerId: 0,
             firstName: "Phil",
             lastName: "Boyce",
             email: "phil.boyce@example.com",
@@ -210,13 +203,14 @@ describe("UpdateCustomer", () => {
             phoneNumber: "555-1234",
             sales: [
                 {
+                    saleId: 0,
                     productId: "1",
                     quantity: "1",
                     unitPrice: "1",
                     totalPrice: 1,
                 },
             ],
-        });
+        }, 1);
 
         await waitFor(() => {
             expect(router.state.location.pathname).toEqual('/')
