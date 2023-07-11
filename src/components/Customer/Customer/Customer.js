@@ -15,7 +15,7 @@ function Customer({ formData, errors, handleChange }) {
                     onChange={handleChange}
                     isInvalid={!!errors.firstName}
                 />
-                <Form.Control.Feedback type="invalid">
+                <Form.Control.Feedback type="invalid" role="error-message">
                     {errors.firstName}
                 </Form.Control.Feedback>
             </Form.Group>
@@ -30,7 +30,7 @@ function Customer({ formData, errors, handleChange }) {
                     onChange={handleChange}
                     isInvalid={!!errors.lastName}
                 />
-                <Form.Control.Feedback type="invalid">
+                <Form.Control.Feedback type="invalid" role="error-message">
                     {errors.lastName}
                 </Form.Control.Feedback>
             </Form.Group>
@@ -45,7 +45,7 @@ function Customer({ formData, errors, handleChange }) {
                     onChange={handleChange}
                     isInvalid={!!errors.email}
                 />
-                <Form.Control.Feedback type="invalid">
+                <Form.Control.Feedback type="invalid" role="error-message">
                     {errors.email}
                 </Form.Control.Feedback>
             </Form.Group>
@@ -60,7 +60,7 @@ function Customer({ formData, errors, handleChange }) {
                     onChange={handleChange}
                     isInvalid={!!errors.address}
                 />
-                <Form.Control.Feedback type="invalid">
+                <Form.Control.Feedback type="invalid" role="error-message">
                     {errors.address}
                 </Form.Control.Feedback>
             </Form.Group>
@@ -75,7 +75,7 @@ function Customer({ formData, errors, handleChange }) {
                     onChange={handleChange}
                     isInvalid={!!errors.phoneNumber}
                 />
-                <Form.Control.Feedback type="invalid">
+                <Form.Control.Feedback type="invalid" role="error-message">
                     {errors.phoneNumber}
                 </Form.Control.Feedback>
             </Form.Group>

@@ -88,11 +88,9 @@ function NewCustomer() {
             // Perform form submission to the server
             var response = await createCustomer(formData);
             // Handle the response from the server
-            if (response.success) {
+            if (response.ok) {
                 navigate("/", { state: { success: true } });
-            } else {
-                console.log("Form submission failed");
-            }
+            } 
         } catch (error) {
             if (error instanceof yup.ValidationError) {
                 const validationErrors = {};
@@ -100,13 +98,9 @@ function NewCustomer() {
                     validationErrors[err.path] = err.message;
                 });
                 setErrors(validationErrors);
-            } else {
-                console.error("Form submission error:", error);
             }
+            setSubmitting(false);
         }
-
-        // Enable submit button after submission
-        setSubmitting(false);
     };
 
 

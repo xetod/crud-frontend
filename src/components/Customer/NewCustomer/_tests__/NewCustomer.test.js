@@ -1,6 +1,6 @@
 import React from "react";
 import * as router from 'react-router'
-import { render, screen, act, waitFor, fireEvent, getByLabelText } from '@testing-library/react';
+import { render, screen, act, waitFor, fireEvent, getByLabelText, waitForElementToBeRemoved, queryByText } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Router, RouterProvider, Routes, createMemoryRouter, useNavigate } from "react-router-dom";
 import NewCustomer from "../NewCustomer";
@@ -33,7 +33,7 @@ const mockAppStateContextValue = {
 const navigate = jest.fn();
 
 jest.mock('../../../../services/customers/customerServices', () => ({
-    createCustomer: jest.fn().mockResolvedValue({ success: true }),
+    createCustomer: jest.fn().mockResolvedValue(() => Promise.resolve({ success: true })),
 }));
 
 const setupRouter = () => {
@@ -56,6 +56,11 @@ const setupRouter = () => {
 beforeEach(() => {
     jest.spyOn(router, 'useNavigate').mockImplementation(() => navigate)
 })
+
+beforeEach(() => {
+    jest.useFakeTimers(); 
+    jest.clearAllMocks();
+  });
 
 describe("NewCustomer", () => {
 
@@ -148,11 +153,13 @@ describe("NewCustomer", () => {
         expect(screen.getAllByTestId("quantity-error")[0]).toBeInTheDocument();
 
         expect(createCustomer).not.toHaveBeenCalled();
-    });
 
+        await waitForElementToBeRemoved(() => screen.queryByText(/Submitting.../i));
+    });
+    
     test("triggers form submission when all fields are valid", async () => {
         const { router } = setupRouter()
-
+       
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
@@ -160,7 +167,7 @@ describe("NewCustomer", () => {
                 </MemoryRouter>
             </AppStateContext.Provider>
         );
-
+      
         fireEvent.change(screen.getByLabelText("First Name"), {
             target: { value: "Phil" },
         });
@@ -177,13 +184,15 @@ describe("NewCustomer", () => {
             target: { value: "555-1234" },
         });
 
-
         fireEvent.change(screen.getAllByTestId("product")[0], { target: { value: "1" } });
         fireEvent.change(screen.getAllByTestId("quantity")[0], { target: { value: "1" } });
         fireEvent.change(screen.getAllByTestId("unitPrice")[0], { target: { value: "1" } });
-        fireEvent.change(screen.getAllByTestId("totalPrice")[0], { target: { value: "1" } });
+        fireEvent.change(screen.getAllByTestId("totalPrice")[0], { target: { value: 1 } });
 
+     
         fireEvent.click(screen.getByText("Submit"));
+     
+        await waitForElementToBeRemoved(() => screen.queryByText(/Submitting.../i));
 
         await waitFor(() => expect(createCustomer).toHaveBeenCalled());
 
@@ -203,8 +212,11 @@ describe("NewCustomer", () => {
             ],
         });
 
+
         await waitFor(() => {
-            expect(router.state.location.pathname).toEqual('/')
-        })
+            expect(router.state.location.pathname).toEqual('/');
+        });
+        // await waitForElementToBeRemoved(() => screen.queryByText(/Submitting.../i));
+
     });
 });

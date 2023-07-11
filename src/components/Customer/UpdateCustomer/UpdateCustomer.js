@@ -132,7 +132,7 @@ function UpdateCustomer() {
                 : await createCustomer(formData);
 
             // Handle the response from the server
-            if (response.success) {
+            if (response.ok) {
                 navigate("/", { state: { success: true } });
             }
         } catch (error) {
@@ -143,10 +143,8 @@ function UpdateCustomer() {
                 });
                 setErrors(validationErrors);
             }
+            setSubmitting(false);
         }
-
-        // Enable submit button after submission
-        setSubmitting(false);
     };
 
     const handleAddSale = () => {

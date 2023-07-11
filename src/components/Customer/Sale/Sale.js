@@ -26,7 +26,7 @@ function Sale({ sales, products, errors, submitting, handleChange, handleAddSale
                   </option>
                 ))}
               </Form.Control>
-              <Form.Control.Feedback type="invalid">
+              <Form.Control.Feedback type="invalid" >
                 {errors[`sales[${index}].productId`]}
               </Form.Control.Feedback>
             </Col>
@@ -56,7 +56,7 @@ function Sale({ sales, products, errors, submitting, handleChange, handleAddSale
                 min="0"
                 data-testid="unitPrice"
               />
-              <Form.Control.Feedback type="invalid">
+              <Form.Control.Feedback type="invalid" >
                 {errors[`sales[${index}].unitPrice`]}
               </Form.Control.Feedback>
             </Col>
@@ -72,7 +72,7 @@ function Sale({ sales, products, errors, submitting, handleChange, handleAddSale
                 data-testid="totalPrice"
                 disabled
               />
-              <Form.Control.Feedback type="invalid">
+              <Form.Control.Feedback type="invalid" >
                 {errors[`sales[${index}].totalPrice`]}
               </Form.Control.Feedback>
             </Col>
