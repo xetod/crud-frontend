@@ -103,6 +103,7 @@ function UpdateCustomer() {
             sales[index] = {
                 ...sales[index],
                 [name]: value ?? 0,
+                totalPrice: name === "quantity" ? value * sales[index].unitPrice : sales[index].quantity * value,
             };
             setFormData((prevFormData) => ({
                 ...prevFormData,

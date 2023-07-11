@@ -1,18 +1,11 @@
 import React from "react";
 import * as router from 'react-router'
-import { render, screen, act, waitFor, fireEvent, getByLabelText } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Router, RouterProvider, Routes, createMemoryRouter, useNavigate } from "react-router-dom";
-import NewCustomer from "../NewCustomer";
+import { useLocation } from "react-router-dom";
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { MemoryRouter, RouterProvider, createMemoryRouter } from "react-router-dom";
+import UpdateCustomer from "../UpdateCustomer";
 import AppStateContext from "../../../../context/AppStateContext";
-import { createCustomer } from '../../../../services/customers/customerServices';
-import GridOverview from "../../../GridOverview/GridOverview";
-
-// Mock the useNavigate hook
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual("react-router-dom"),
-    useNavigate: jest.fn(),
-}));
+import { updateCustomer } from '../../../../services/customers/customerServices';
 
 const mockAppStateContextValue = {
     state: {
@@ -30,16 +23,13 @@ const mockAppStateContextValue = {
         ]
     }
 };
-const navigate = jest.fn();
 
-jest.mock('../../../../services/customers/customerServices', () => ({
-    createCustomer: jest.fn().mockResolvedValue({ success: true }),
-}));
 
 const setupRouter = () => {
     const router = createMemoryRouter(
         [
             {
+                name: "start",
                 path: '/',
                 element: <>Navigated from Start</>,
             }
@@ -49,6 +39,7 @@ const setupRouter = () => {
             initialIndex: 0,
         }
     )
+
     render(<RouterProvider router={router} />)
     return { router }
 }
@@ -57,14 +48,37 @@ beforeEach(() => {
     jest.spyOn(router, 'useNavigate').mockImplementation(() => navigate)
 })
 
-describe("NewCustomer", () => {
+const navigate = jest.fn();
+
+// jest.mock("react-router-dom", () => ({
+//     ...jest.requireActual("react-router-dom"),
+//     useNavigate: jest.fn(),
+// }));
+
+
+jest.mock("react-router-dom", () => ({
+    ...jest.requireActual("react-router-dom"),
+    useLocation: jest.fn(),
+}));
+
+jest.mock('../../../../services/customers/customerServices', () => ({
+    updateCustomer: jest.fn().mockResolvedValue({ success: true }),
+}));
+
+describe("UpdateCustomer", () => {
+
+    beforeEach(() => {
+        useLocation.mockReturnValue({
+            state: { customerId: 1 },
+        });
+    });
 
     it("should render the form fields correctly", () => {
 
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
-                    <NewCustomer />
+                    <UpdateCustomer />
                 </MemoryRouter>
             </AppStateContext.Provider>
         );
@@ -80,7 +94,7 @@ describe("NewCustomer", () => {
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
-                    <NewCustomer />
+                    <UpdateCustomer />
                 </MemoryRouter>
             </AppStateContext.Provider>
         );
@@ -102,7 +116,7 @@ describe("NewCustomer", () => {
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
-                    <NewCustomer />
+                    <UpdateCustomer />
                 </MemoryRouter>
             </AppStateContext.Provider>
         );
@@ -118,7 +132,7 @@ describe("NewCustomer", () => {
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
-                    <NewCustomer />
+                    <UpdateCustomer />
                 </MemoryRouter>
             </AppStateContext.Provider>
         );
@@ -132,7 +146,7 @@ describe("NewCustomer", () => {
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
-                    <NewCustomer />
+                    <UpdateCustomer />
                 </MemoryRouter>
             </AppStateContext.Provider>
         )
@@ -147,7 +161,7 @@ describe("NewCustomer", () => {
 
         expect(screen.getAllByTestId("quantity-error")[0]).toBeInTheDocument();
 
-        expect(createCustomer).not.toHaveBeenCalled();
+        expect(updateCustomer).not.toHaveBeenCalled();
     });
 
     test("triggers form submission when all fields are valid", async () => {
@@ -156,7 +170,7 @@ describe("NewCustomer", () => {
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
-                    <NewCustomer />
+                    <UpdateCustomer />
                 </MemoryRouter>
             </AppStateContext.Provider>
         );
@@ -185,9 +199,10 @@ describe("NewCustomer", () => {
 
         fireEvent.click(screen.getByText("Submit"));
 
-        await waitFor(() => expect(createCustomer).toHaveBeenCalled());
+        await waitFor(() => expect(updateCustomer).toHaveBeenCalled());
 
-        expect(createCustomer).toHaveBeenCalledWith({
+        expect(updateCustomer).toHaveBeenCalledWith({
+            customerId:1,
             firstName: "Phil",
             lastName: "Boyce",
             email: "phil.boyce@example.com",

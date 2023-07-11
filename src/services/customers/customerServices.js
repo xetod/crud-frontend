@@ -50,7 +50,6 @@ const createCustomer = async (formData) => {
 
 const updateCustomer = async (formData, customerId) => {
     try {
-        console.log(formData, customerId);
         const response = await fetch(`${process.env.REACT_APP_API_URL}/api/customers/${customerId}`, {
             method: "PUT",
             headers: {
@@ -72,4 +71,26 @@ const updateCustomer = async (formData, customerId) => {
     }
 };
 
-export { getCustomers, createCustomer, getCustomer, updateCustomer };
+const deleteCustomer = async (customerId) => {
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/customers/${customerId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+
+        // Check if the request was successful (status 2xx)
+        if (response.ok) {
+            // Return the response
+            return { success: true };
+        } else {
+            throw new Error("Request failed with status: " + response.status);
+        }
+    } catch (error) {
+        // Rethrow the error to the callee
+        throw error;
+    }
+};
+
+export { getCustomers, createCustomer, getCustomer, updateCustomer, deleteCustomer };
