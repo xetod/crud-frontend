@@ -1,0 +1,21 @@
+.sectionTitleDivider {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.sectionTitle {
+    font-weight: bold;
+}
+
+.columnSize {
+    margin-left: 3.5rem;
+}
+
+.salesRow {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.removeButtonContainer {
+    margin-top: auto;
+}

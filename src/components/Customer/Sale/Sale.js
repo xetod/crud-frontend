@@ -1,14 +1,15 @@
 import React from "react";
 import { Form, Button, Col, Row } from "react-bootstrap";
+import styles from "./Sale.module.css";
 
 function Sale({ sales, products, errors, submitting, handleChange, handleAddSale, handleRemoveSale }) {
   return (
     <div>
       <Form.Group controlId="formSales">
-        <Form.Label>Sales</Form.Label>
+        <Form.Label className={`${styles.sectionTitleDivider} ${styles.sectionTitle}`}>Sales</Form.Label>
         {sales.map((sale, index) => (
-          <Row key={index}>
-            <Col>
+          <Row key={index} className={styles.salesRow}>
+            <Col xs={12} sm={8} md={6} lg={4} xl={4}>
               <Form.Label>Product</Form.Label>
               <Form.Control
                 as="select"
@@ -29,7 +30,7 @@ function Sale({ sales, products, errors, submitting, handleChange, handleAddSale
                 {errors[`sales[${index}].productId`]}
               </Form.Control.Feedback>
             </Col>
-            <Col xs="auto">
+            <Col xs={6} sm={4} md={3} lg={2} xl={2}>
               <Form.Label>Quantity</Form.Label>
               <Form.Control
                 type="number"
@@ -44,10 +45,10 @@ function Sale({ sales, products, errors, submitting, handleChange, handleAddSale
                 {errors[`sales[${index}].quantity`]}
               </Form.Control.Feedback>
             </Col>
-            <Col xs="auto">
+            <Col xs={6} sm={4} md={3} lg={2} xl={2}>
               <Form.Label>Unit Price</Form.Label>
               <Form.Control
-                // type="number"
+                type="number"
                 name="unitPrice"
                 value={sale.unitPrice || ""}
                 onChange={(event) => handleChange(event, index)}
@@ -59,25 +60,26 @@ function Sale({ sales, products, errors, submitting, handleChange, handleAddSale
                 {errors[`sales[${index}].unitPrice`]}
               </Form.Control.Feedback>
             </Col>
-            <Col xs="auto">
+            <Col xs={6} sm={4} md={3} lg={2} xl={2}>
               <Form.Label>Total Price</Form.Label>
               <Form.Control
-                // type="number"
+                type="number"
                 name="totalPrice"
                 value={sale.totalPrice || ""}
                 onChange={(event) => handleChange(event, index)}
                 isInvalid={!!errors[`sales[${index}].totalPrice`]}
                 min="0"
                 data-testid="totalPrice"
+                disabled
               />
               <Form.Control.Feedback type="invalid">
                 {errors[`sales[${index}].totalPrice`]}
               </Form.Control.Feedback>
             </Col>
-            <Col xs="auto">
+            <Col xs={6} sm={4} md={3} lg={2} xl={2} className={styles.removeButtonContainer}>
               {index === sales.length - 1 && (
                 <Button
-                  variant="secondary"
+                  variant="success"
                   onClick={handleAddSale}
                   disabled={submitting}
                   data-testid="addSale"
@@ -87,7 +89,7 @@ function Sale({ sales, products, errors, submitting, handleChange, handleAddSale
               )}
               {index !== sales.length - 1 && (
                 <Button
-                  variant="secondary"
+                  variant="danger"
                   onClick={() => handleRemoveSale(index)}
                   disabled={submitting}
                 >
