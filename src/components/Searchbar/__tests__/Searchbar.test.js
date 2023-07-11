@@ -6,7 +6,7 @@ import Searchbar from "../Searchbar";
 
 // Mock the value of the AppStateContext
 const mockAppStateContextValue = {
-    getCustomers: jest.fn(),
+    fetchCustomers: jest.fn(),
 };
 
 // Mock the useNavigate hook
@@ -33,13 +33,14 @@ describe("Searchbar", () => {
 
     it("calls getCustomers with the correct parameters when searching", () => {
         renderSearchbar();
+
         const searchInput = screen.getByPlaceholderText("Search");
         const searchButton = screen.getByRole("button", { name: "Search" });
 
         fireEvent.change(searchInput, { target: { value: "example" } });
         fireEvent.click(searchButton);
 
-        expect(mockAppStateContextValue.getCustomers).toHaveBeenCalledWith({
+        expect(mockAppStateContextValue.fetchCustomers).toHaveBeenCalledWith({
             currentPage: 1,
             searchText: "example",
         });

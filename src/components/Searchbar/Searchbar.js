@@ -9,7 +9,7 @@ const Searchbar = () => {
     const navigate = useNavigate();
     
     // Get the getCustomers function from the AppStateContext
-    const { getCustomers } = useContext(AppStateContext);
+    const { fetchCustomers } = useContext(AppStateContext);
     
     // Create state for the search text
     const [searchText, setSearchText] = useState("");
@@ -19,7 +19,7 @@ const Searchbar = () => {
       e.preventDefault();
       
       // Call the getCustomers function with the current page and search text
-      getCustomers({
+      fetchCustomers({
         currentPage: 1,
         searchText: searchText
       });
