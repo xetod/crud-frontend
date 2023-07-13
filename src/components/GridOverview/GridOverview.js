@@ -1,64 +1,103 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Table, Button, Badge, Spinner, Alert } from "react-bootstrap";
+import { Table, Button, Badge, Spinner, Alert, Modal } from "react-bootstrap";
 import styles from "./GridOverview.module.css";
 import AppStateContext from "../../context/AppStateContext";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { deleteCustomer } from "../../services/";
 
 const GridOverview = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-  const [saveAlert, setSaveAlert] = useState(false);
-  const { state, getCustomers } = useContext(AppStateContext);
+  const [deletePrompt, setDeletePrompt] = useState(false);
+  const [deleteCustomerId, setDeleteCustomerId] = useState(0);
+  const [saveAlert, setSaveAlert] = useState({ show: false, message: "" });
+  const { state, dispatch } = useContext(AppStateContext);
   const { customers, loading } = state;
 
   useEffect(() => {
-    // Fetch customers when the component mounts
-    getCustomers({ currentPage: currentPage });
-  }, []);
+    setCurrentPage(state.currentPage);
+  }, [state.currentPage]);
+
 
   useEffect(() => {
     let timer;
-    if (location.state?.success) {
-      setSaveAlert(true);
 
+    const showAlertMessage = location.state?.success || saveAlert.show;
+    const alertMessage = location.state?.success
+      ? "Data sent to server successfully."
+      : saveAlert
+        ? saveAlert.message
+        : "";
+
+    if (showAlertMessage) {
+      setSaveAlert({ show: true, message: alertMessage });
       timer = setTimeout(() => {
-        setSaveAlert(false);
-        // Set success to false after 8 seconds
+        setSaveAlert({ show: false, message: "" });
+        navigate(location.pathname, {});
       }, 3000);
     }
-    return () => {
-      window.history.replaceState({}, document.title);
 
+    return () => {
       clearTimeout(timer);
     };
-  }, [location.state?.success]);
+  }, [location.state?.success, saveAlert.show]);
 
-  const handlePageChange = (currentPage) => {
-    // Update the current page and fetch customers
-    setCurrentPage(currentPage);
-    getCustomers({ currentPage: currentPage });
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    dispatch({ type: "SET_CURRENT_PAGE", payload: page });
   };
 
   const handleEditCustomer = (customerId) => {
-    // Log the customer ID
-    console.log(location);
+    navigate("/update-customer", { state: { customerId: customerId } });
   };
+
+  const handleDeleteCustomer = async () => {
+    var response = await deleteCustomer(deleteCustomerId);
+    if (response.ok) {
+      setSaveAlert({ show: true, message: "Customer was deleted successfully." });
+      setDeletePrompt(false);
+      dispatch({ type: "REFRESH_CUSTOMERS", payload: true });
+    } 
+  };
+
+  const handleClosePrompt = () => setDeletePrompt(false);
+
+  const handleShowPrompt = (customerId) => {
+    setDeleteCustomerId(customerId);
+    setDeletePrompt(true);
+  }
 
   return (
     <div data-testid="grid-overview">
+      <Modal show={deletePrompt} onHide={handleClosePrompt}>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure to delete this customer?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClosePrompt}>
+            Close
+          </Button>
+          <Button variant="danger" onClick={() => handleDeleteCustomer()}>
+            Delete Customer
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       {loading ? (
         // Show a loading spinner if the data is loading
-        <div className={styles.spinnerContainer}>
-          <Spinner animation="border" role="status">
+        <div className={styles.spinnerContainer} data-testid="spinner">
+          <Spinner animation="border" role="status" >
             <span className="visually-hidden">Loading...</span>
           </Spinner>
         </div>
       ) : customers && customers.results.length > 0 ? (
         // Render the table if data is available
         <div>
-          {saveAlert && (
+          {saveAlert.show && (
             <Alert variant="info" className={styles.alert} dismissible>
-              Data sent to server successfully. 
+              {saveAlert.message}
             </Alert>
           )}
           <Table striped bordered>
@@ -67,7 +106,7 @@ const GridOverview = () => {
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>Email</th>
-                <th style={{ width: "20%" }}>Sale</th>
+                <th>Products</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -85,7 +124,7 @@ const GridOverview = () => {
                     ))}
                   </td>
                   <td>
-                    <Button variant="danger">
+                    <Button variant="danger" onClick={() => handleShowPrompt(item.customerId)}>
                       Delete
                     </Button>
                     <Button variant="secondary" className={styles.divider} onClick={() => handleEditCustomer(item.customerId)}>
