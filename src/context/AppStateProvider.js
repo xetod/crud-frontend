@@ -1,13 +1,16 @@
-import React, { createContext, useEffect, useMemo, useReducer } from "react";
+import React, { useEffect, useReducer } from "react";
 import AppStateContext from "../context/AppStateContext";
-import { fetchCustomers, fetchProducts } from "../services/index";
+import { getCustomers, fetchProducts } from "../services/index";
 
 // Define the initial state
 const initialState = {
     customers: null,
     products: null,
     loading: false,
-    error: null
+    error: null,
+    currentPage: 1,
+    searchText: "",
+    refreshCustomers: false
 };
 
 // Define a reducer function to update the state
@@ -17,7 +20,8 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 loading: true,
-                error: null
+                error: null,
+                refreshCustomers: false
             };
         case "FETCH_PRODUCTS_SUCCESS":
             return {
@@ -37,38 +41,72 @@ const reducer = (state, action) => {
                 loading: false,
                 error: action.payload
             };
+        case "SET_CURRENT_PAGE":
+            return {
+                ...state,
+                currentPage: action.payload
+            };
+        case "SET_SEARCH_TEXT":
+            return {
+                ...state,
+                searchText: action.payload,
+                currentPage: 1
+            };
+        case "REFRESH_CUSTOMERS":
+            return {
+                ...state,
+                refreshCustomers: action.payload
+            };
         default:
             return state;
     }
 };
 
-// Create the provider component
 const AppStateProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
 
     useEffect(() => {
-        // Fetch products when the component mounts
         const fetchInitialData = async () => {
-            dispatch({ type: "FETCH_START" }); // Set loading state
-
+            dispatch({ type: "FETCH_START" });
             try {
                 const products = await fetchProducts();
-                dispatch({ type: "FETCH_PRODUCTS_SUCCESS", payload: products }); // Save products to state
+                dispatch({ type: "FETCH_PRODUCTS_SUCCESS", payload: products });
             } catch (error) {
-                dispatch({ type: "FETCH_ERROR", payload: error }); // Set error state
+                dispatch({ type: "FETCH_ERROR", payload: error });
             }
         };
 
         fetchInitialData();
     }, []);
 
-    const getCustomers = async ({ currentPage, searchText = "" }) => {
-        await fetchCustomers({ dispatch, currentPage, searchText });
-    };
+    useEffect(() => {
+        const fetchCustomers = async () => {            
+            await getCustomers({
+                dispatch: dispatch,
+                currentPage: state.searchText ? 1 : state.currentPage,
+                searchText: state.searchText
+            });
+        };
 
-    // Provide the state and fetch function to consuming components
+        fetchCustomers();
+    }, [state.currentPage, state.searchText]);    
+    
+    useEffect(() => {
+        const fetchCustomers = async () => {
+            if (!state.refreshCustomers) return;
+            
+            await getCustomers({
+                dispatch: dispatch,
+                currentPage: state.searchText ? 1 : state.currentPage,
+                searchText: state.searchText
+            });
+        };
+
+        fetchCustomers();
+    }, [state.refreshCustomers]);
+
     return (
-        <AppStateContext.Provider value={{ state, getCustomers }}>
+        <AppStateContext.Provider value={{ state, dispatch }}>
             {children}
         </AppStateContext.Provider>
     );
