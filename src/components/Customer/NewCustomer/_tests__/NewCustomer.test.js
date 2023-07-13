@@ -1,18 +1,10 @@
 import React from "react";
-import * as router from 'react-router'
-import { render, screen, act, waitFor, fireEvent, getByLabelText, waitForElementToBeRemoved, queryByText } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Route, Router, RouterProvider, Routes, createMemoryRouter, useNavigate } from "react-router-dom";
+import * as router from "react-router"
+import { render, screen, waitFor, fireEvent, waitForElementToBeRemoved } from "@testing-library/react";
+import { MemoryRouter, RouterProvider, createMemoryRouter } from "react-router-dom";
 import NewCustomer from "../NewCustomer";
 import AppStateContext from "../../../../context/AppStateContext";
-import { createCustomer } from '../../../../services/customers/customerServices';
-import GridOverview from "../../../GridOverview/GridOverview";
-
-// Mock the useNavigate hook
-jest.mock("react-router-dom", () => ({
-    ...jest.requireActual("react-router-dom"),
-    useNavigate: jest.fn(),
-}));
+import { createCustomer } from "../../../../services/customers/customerServices";
 
 const mockAppStateContextValue = {
     state: {
@@ -30,9 +22,8 @@ const mockAppStateContextValue = {
         ]
     }
 };
-const navigate = jest.fn();
 
-jest.mock('../../../../services/customers/customerServices', () => ({
+jest.mock("../../../../services/customers/customerServices", () => ({
     createCustomer: jest.fn().mockResolvedValue(() => Promise.resolve({ success: true })),
 }));
 
@@ -40,12 +31,12 @@ const setupRouter = () => {
     const router = createMemoryRouter(
         [
             {
-                path: '/',
+                path: "/",
                 element: <>Navigated from Start</>,
             }
         ],
         {
-            initialEntries: ['/'],
+            initialEntries: ["/"],
             initialIndex: 0,
         }
     )
@@ -54,13 +45,13 @@ const setupRouter = () => {
 }
 
 beforeEach(() => {
-    jest.spyOn(router, 'useNavigate').mockImplementation(() => navigate)
+    jest.spyOn(router, "useNavigate").mockImplementation(() => jest.fn())
 })
 
 beforeEach(() => {
-    jest.useFakeTimers(); 
+    jest.useFakeTimers();
     jest.clearAllMocks();
-  });
+});
 
 describe("NewCustomer", () => {
 
@@ -103,7 +94,7 @@ describe("NewCustomer", () => {
         });
     });
 
-    test("removes a sale when the 'Remove Sale' button is clicked", () => {
+    test("removes a sale when the Remove Sale button is clicked", () => {
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
@@ -119,7 +110,7 @@ describe("NewCustomer", () => {
         expect(screen.getAllByTestId("product").length).toBe(1);
     });
 
-    test("adds a new sale when the 'Add Sale' button is clicked", () => {
+    test("adds a new sale when the Add Sale button is clicked", () => {
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
@@ -156,10 +147,10 @@ describe("NewCustomer", () => {
 
         await waitForElementToBeRemoved(() => screen.queryByText(/Submitting.../i));
     });
-    
+
     test("triggers form submission when all fields are valid", async () => {
         const { router } = setupRouter()
-       
+
         render(
             <AppStateContext.Provider value={mockAppStateContextValue}>
                 <MemoryRouter>
@@ -167,7 +158,7 @@ describe("NewCustomer", () => {
                 </MemoryRouter>
             </AppStateContext.Provider>
         );
-      
+
         fireEvent.change(screen.getByLabelText("First Name"), {
             target: { value: "Phil" },
         });
@@ -189,9 +180,9 @@ describe("NewCustomer", () => {
         fireEvent.change(screen.getAllByTestId("unitPrice")[0], { target: { value: "1" } });
         fireEvent.change(screen.getAllByTestId("totalPrice")[0], { target: { value: 1 } });
 
-     
+
         fireEvent.click(screen.getByText("Submit"));
-     
+
         await waitForElementToBeRemoved(() => screen.queryByText(/Submitting.../i));
 
         await waitFor(() => expect(createCustomer).toHaveBeenCalled());
@@ -214,9 +205,7 @@ describe("NewCustomer", () => {
 
 
         await waitFor(() => {
-            expect(router.state.location.pathname).toEqual('/');
+            expect(router.state.location.pathname).toEqual("/");
         });
-        // await waitForElementToBeRemoved(() => screen.queryByText(/Submitting.../i));
-
     });
 });

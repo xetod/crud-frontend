@@ -7,8 +7,6 @@ import UpdateCustomer from "../UpdateCustomer";
 import AppStateContext from "../../../../context/AppStateContext";
 import { updateCustomer } from "../../../../services/customers/customerServices";
 
-const navigate = jest.fn();
-
 const mockAppStateContextValue = {
     state: {
         products: [
@@ -63,8 +61,13 @@ const setupRouter = () => {
     return { router }
 }
 
+jest.mock("../../../../services/customers/customerServices", () => ({
+    updateCustomer: jest.fn().mockResolvedValue({ success: true }),
+    getCustomer: jest.fn().mockResolvedValue(() => { return customer }),
+}));
+
 beforeEach(() => {
-    jest.spyOn(router, "useNavigate").mockImplementation(() => navigate)
+    jest.spyOn(router, "useNavigate").mockImplementation(() => jest.fn())
 })
 
 jest.mock("react-router-dom", () => ({
@@ -72,18 +75,15 @@ jest.mock("react-router-dom", () => ({
     useLocation: jest.fn(),
 }));
 
-jest.mock("../../../../services/customers/customerServices", () => ({
-    updateCustomer: jest.fn().mockResolvedValue({ success: true }),
-    getCustomer: jest.fn().mockResolvedValue(() => { return customer }),
-}));
+beforeEach(() => {
+    useLocation.mockReturnValue({
+        state: { customerId: 1 },
+    });
+});
+
+
 
 describe("UpdateCustomer", () => {
-
-    beforeEach(() => {
-        useLocation.mockReturnValue({
-            state: { customerId: 1 },
-        });
-    });
 
     it("should render the form fields correctly", () => {
 

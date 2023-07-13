@@ -1,39 +1,43 @@
 import React from "react";
 import { render, fireEvent, screen } from "@testing-library/react";
-import userEvent from '@testing-library/user-event';
 import Sale from "../Sale";
 
+const sales = [
+  {
+    productId: 1,
+    quantity: 5,
+    unitPrice: 10,
+    totalPrice: 50,
+  },
+  {
+    productId: 2,
+    quantity: 3,
+    unitPrice: 15,
+    totalPrice: 45,
+  },
+];
+
+const products = [
+  {
+    productId: 1,
+    name: "Product 1",
+  },
+  {
+    productId: 2,
+    name: "Product 2",
+  },
+];
+
+const handleChange = jest.fn();
+const handleAddSale = jest.fn();
+const handleRemoveSale = jest.fn();
+
+beforeEach(() => {
+  jest.useFakeTimers();
+  jest.clearAllMocks();
+});
+
 describe("Sale", () => {
-  const sales = [
-    {
-      productId: 1,
-      quantity: 5,
-      unitPrice: 10,
-      totalPrice: 50,
-    },
-    {
-      productId: 2,
-      quantity: 3,
-      unitPrice: 15,
-      totalPrice: 45,
-    },
-  ];
-
-  const products = [
-    {
-      productId: 1,
-      name: "Product 1",
-    },
-    {
-      productId: 2,
-      name: "Product 2",
-    },
-  ];
-
-  const handleChange = jest.fn();
-  const handleAddSale = jest.fn();
-  const handleRemoveSale = jest.fn();
-
   it("renders sales form correctly", async () => {
     render(
       <Sale
@@ -122,23 +126,23 @@ describe("Sale", () => {
     expect(handleAddSale).toHaveBeenCalled();
   });
 
-    it("triggers handleRemoveSale when 'Remove' button is clicked", () => {
-      render(
-        <Sale
-          sales={sales}
-          products={products}
-          errors={{}}
-          submitting={false}
-          handleChange={handleChange}
-          handleAddSale={handleAddSale}
-          handleRemoveSale={handleRemoveSale}
-        />
-      );
+  it("triggers handleRemoveSale when 'Remove' button is clicked", () => {
+    render(
+      <Sale
+        sales={sales}
+        products={products}
+        errors={{}}
+        submitting={false}
+        handleChange={handleChange}
+        handleAddSale={handleAddSale}
+        handleRemoveSale={handleRemoveSale}
+      />
+    );
 
-      const removeButtons = screen.getAllByText("Remove");
+    const removeButtons = screen.getAllByText("Remove");
 
-      fireEvent.click(removeButtons[0]);
+    fireEvent.click(removeButtons[0]);
 
-      expect(handleRemoveSale).toHaveBeenCalledWith(0);
-    });
+    expect(handleRemoveSale).toHaveBeenCalledWith(0);
+  });
 });

@@ -6,6 +6,7 @@ import AppStateContext from "../../../context/AppStateContext";
 import { createCustomer } from "../../../services"
 import Customer from "../Customer/Customer";
 import Sale from "../Sale/Sale";
+import schema from "../../../validations/customer/schema";
 import styles from "./NewCustomer.module.css";
 
 function NewCustomer() {
@@ -32,27 +33,6 @@ function NewCustomer() {
         sales: {},
     });
 
-
-    const schema = yup.object().shape({
-        firstName: yup.string().required("First name is required"),
-        lastName: yup.string().required("Last name is required"),
-        email: yup.string().email("Invalid email").required("Email is required"),
-        address: yup.string().required("Address is required"),
-        phoneNumber: yup.string().required("Phone number is required"),
-        sales: yup
-            .array(
-                yup.object().shape({
-                    productId: yup.number()
-                        .required("Product name is required")
-                        .min(1, "Product should be selected."),
-                    quantity: yup.number()
-                        .required("Quantity is required")
-                        .min(1, "Quantity must be greater than zero")
-                })
-            )
-    });
-
-
     const handleChange = (event, index) => {
         const { name, value } = event.target;
         if (name === "productId" || name === "quantity" || name === "date" || name === "unitPrice" || name === "totalPrice") {
@@ -65,7 +45,7 @@ function NewCustomer() {
             setFormData((prevFormData) => ({
                 ...prevFormData,
                 sales,
-            }));  
+            }));
         } else {
             setFormData((prevFormData) => ({
                 ...prevFormData,
@@ -90,7 +70,7 @@ function NewCustomer() {
             // Handle the response from the server
             if (response.ok) {
                 navigate("/", { state: { success: true } });
-            } 
+            }
         } catch (error) {
             if (error instanceof yup.ValidationError) {
                 const validationErrors = {};

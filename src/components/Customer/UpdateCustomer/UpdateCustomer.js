@@ -6,6 +6,7 @@ import AppStateContext from "../../../context/AppStateContext";
 import { createCustomer, getCustomer, updateCustomer } from "../../../services"; // Assuming you have a service function to get products
 import Customer from "../Customer/Customer";
 import Sale from "../Sale/Sale";
+import schema from "../../../validations/customer/schema";
 import styles from "./UpdateCustomer.module.css";
 
 function UpdateCustomer() {
@@ -33,26 +34,6 @@ function UpdateCustomer() {
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({
         sales: {},
-    });
-
-    const schema = yup.object().shape({
-        firstName: yup.string().required("First name is required"),
-        lastName: yup.string().required("Last name is required"),
-        email: yup.string().email("Invalid email").required("Email is required"),
-        address: yup.string().required("Address is required"),
-        phoneNumber: yup.string().required("Phone number is required"),
-        sales: yup.array(
-            yup.object().shape({
-                productId: yup
-                    .number()
-                    .required("Product name is required")
-                    .min(1, "Product should be selected."),
-                quantity: yup
-                    .number()
-                    .required("Quantity is required")
-                    .min(1, "Quantity must be greater than zero"),
-            })
-        ),
     });
 
     useEffect(() => {
