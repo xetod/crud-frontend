@@ -1,6 +1,6 @@
 const getCustomers = async ({ dispatch, currentPage, searchText = "" }) => {
     dispatch({ type: "FETCH_START" });
-
+console.log(currentPage, searchText);
     const params = new URLSearchParams({
         currentPage: currentPage.toString(),
         searchText
@@ -38,7 +38,7 @@ const createCustomer = async (formData) => {
         // Check if the request was successful (status 2xx)
         if (response.ok) {
             // Return the response
-            return { success: true };
+            return response;
         } else {
             throw new Error("Request failed with status: " + response.status);
         }
@@ -61,7 +61,7 @@ const updateCustomer = async (formData, customerId) => {
         // Check if the request was successful (status 2xx)
         if (response.ok) {
             // Return the response
-            return { success: true };
+            return response;
         } else {
             throw new Error("Request failed with status: " + response.status);
         }
@@ -82,8 +82,8 @@ const deleteCustomer = async (customerId) => {
 
         // Check if the request was successful (status 2xx)
         if (response.ok) {
-            // Return the response
-            return { success: true };
+            // Return the response            
+            return response;
         } else {
             throw new Error("Request failed with status: " + response.status);
         }
