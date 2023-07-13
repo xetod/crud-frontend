@@ -19,19 +19,21 @@ const GridOverview = () => {
     setCurrentPage(state.currentPage);
   }, [state.currentPage]);
 
-
   useEffect(() => {
     let timer;
 
+    // Show alert message when data is saved successfully or alert is set
     const showAlertMessage = location.state?.success || saveAlert.show;
     const alertMessage = location.state?.success
       ? "Data sent to server successfully."
       : saveAlert
-        ? saveAlert.message
-        : "";
+      ? saveAlert.message
+      : "";
 
     if (showAlertMessage) {
       setSaveAlert({ show: true, message: alertMessage });
+
+      // Set a timer to hide the alert after 3 seconds
       timer = setTimeout(() => {
         setSaveAlert({ show: false, message: "" });
         navigate(location.pathname, {});
@@ -43,15 +45,18 @@ const GridOverview = () => {
     };
   }, [location.state?.success, saveAlert.show]);
 
+  // Handle page change event
   const handlePageChange = (page) => {
     setCurrentPage(page);
     dispatch({ type: "SET_CURRENT_PAGE", payload: page });
   };
 
+  // Handle edit customer event
   const handleEditCustomer = (customerId) => {
     navigate("/update-customer", { state: { customerId: customerId } });
   };
 
+  // Handle delete customer event
   const handleDeleteCustomer = async () => {
     var response = await deleteCustomer(deleteCustomerId);
     if (response.ok) {
@@ -61,8 +66,10 @@ const GridOverview = () => {
     } 
   };
 
+  // Close the delete prompt modal
   const handleClosePrompt = () => setDeletePrompt(false);
 
+  // Show the delete prompt modal for a specific customer
   const handleShowPrompt = (customerId) => {
     setDeleteCustomerId(customerId);
     setDeletePrompt(true);
@@ -96,6 +103,7 @@ const GridOverview = () => {
         // Render the table if data is available
         <div>
           {saveAlert.show && (
+            // Show an alert if there is a save message
             <Alert variant="info" className={styles.alert} dismissible>
               {saveAlert.message}
             </Alert>

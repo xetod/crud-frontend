@@ -3,182 +3,213 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Form, Button } from "react-bootstrap";
 import * as yup from "yup";
 import AppStateContext from "../../../context/AppStateContext";
-import { createCustomer, getCustomer, updateCustomer } from "../../../services"; // Assuming you have a service function to get products
+import { createCustomer, getCustomer, updateCustomer } from "../../../services";
 import Customer from "../Customer/Customer";
 import Sale from "../Sale/Sale";
 import schema from "../../../validations/customer/schema";
 import styles from "./UpdateCustomer.module.css";
 
+/**
+ * Component for updating a customer.
+ * This component displays a form for updating a customer's details and sales information.
+ * It communicates with the server to fetch existing customer data and handles form submission.
+ */
 function UpdateCustomer() {
-    const navigate = useNavigate();
-    const location = useLocation();
-    const { state } = useContext(AppStateContext);
-    const { products } = state;
-    const [formData, setFormData] = useState({
-        customerId: 0,
-        firstName: "",
-        lastName: "",
-        email: "",
-        address: "",
-        phoneNumber: "",
-        sales: [
-            {
-                saleId: 0,
-                productId: 0,
-                quantity: 0,
-                unitPrice: 0,
-                totalPrice: 0,
-            },
-        ],
-    });
-    const [submitting, setSubmitting] = useState(false);
-    const [errors, setErrors] = useState({
-        sales: {},
-    });
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { state } = useContext(AppStateContext);
+  const { products } = state;
+  const [formData, setFormData] = useState({
+    customerId: 0,
+    firstName: "",
+    lastName: "",
+    email: "",
+    address: "",
+    phoneNumber: "",
+    sales: [
+      {
+        saleId: 0,
+        productId: 0,
+        quantity: 0,
+        unitPrice: 0,
+        totalPrice: 0,
+      },
+    ],
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({
+    sales: {},
+  });
 
-    useEffect(() => {
-        async function fetchCustomer() {
-            try {
-                // Make the API call to fetch customer data from the server
-                const response = await getCustomer(location.state?.customerId); // Replace 'getCustomerData' with the actual API call
+  useEffect(() => {
+    /**
+     * Fetches the customer data from the server.
+     * If the component is used for updating an existing customer, it retrieves the customer's details.
+     * If an error occurs during data fetching, it logs the error to the console.
+     */
+    async function fetchCustomer() {
+      try {
+        const response = await getCustomer(location.state?.customerId);
 
-                if (response) {
-                    const { customerId, firstName, lastName, email, address, phoneNumber, sales } = response;
+        if (response) {
+          const { customerId, firstName, lastName, email, address, phoneNumber, sales } = response;
 
-                    // Update the form data with the fetched values
-                    setFormData((prevFormData) => ({
-                        ...prevFormData,
-                        customerId,
-                        firstName,
-                        lastName,
-                        email,
-                        address,
-                        phoneNumber,
-                        sales: sales.map((sale) => ({
-                            saleId: sale.saleId,
-                            productId: sale.productId,
-                            quantity: sale.quantity,
-                            unitPrice: sale.unitPrice,
-                            totalPrice: sale.totalPrice,
-                        })),
-                    }));
-                }
-            } catch (error) {
-                console.error("Error fetching customer data:", error);
-            }
-        }
-
-        fetchCustomer();
-    }, [location.state?.customerId]);
-
-    const handleChange = (event, index) => {
-        const { name, value } = event.target;
-        if (
-            name === "productId" ||
-            name === "quantity" ||
-            name === "date" ||
-            name === "unitPrice" ||
-            name === "totalPrice"
-        ) {
-            const sales = [...formData.sales];
-            sales[index] = {
-                ...sales[index],
-                [name]: value ?? 0,
-                totalPrice: name === "quantity" ? value * sales[index].unitPrice : sales[index].quantity * value,
-            };
-            setFormData((prevFormData) => ({
-                ...prevFormData,
-                sales,
-            }));
-        } else {
-            setFormData((prevFormData) => ({
-                ...prevFormData,
-                [name]: value,
-            }));
-        }
-    };
-
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-
-        // Disable submit button while submitting
-        setSubmitting(true);
-
-        try {
-            // Validate form
-            await schema.validate(formData, { abortEarly: false });
-
-            var response = location.state?.customerId
-                ? await updateCustomer(formData, location.state?.customerId)
-                : await createCustomer(formData);
-
-            // Handle the response from the server
-            if (response.ok) {
-                navigate("/", { state: { success: true } });
-            }
-        } catch (error) {
-            if (error instanceof yup.ValidationError) {
-                const validationErrors = {};
-                error.inner.forEach((err) => {
-                    validationErrors[err.path] = err.message;
-                });
-                setErrors(validationErrors);
-            }
-            setSubmitting(false);
-        }
-    };
-
-    const handleAddSale = () => {
-        setFormData((prevFormData) => ({
+          // Update the form data with the fetched values
+          setFormData((prevFormData) => ({
             ...prevFormData,
-            sales: [...prevFormData.sales, { productId: 0 }],
-        }));
-    };
+            customerId,
+            firstName,
+            lastName,
+            email,
+            address,
+            phoneNumber,
+            sales: sales.map((sale) => ({
+              saleId: sale.saleId,
+              productId: sale.productId,
+              quantity: sale.quantity,
+              unitPrice: sale.unitPrice,
+              totalPrice: sale.totalPrice,
+            })),
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching customer data:", error);
+      }
+    }
 
-    const handleRemoveSale = (index) => {
-        setFormData((prevFormData) => {
-            const sales = [...prevFormData.sales];
-            sales.splice(index, 1);
-            return {
-                ...prevFormData,
-                sales,
-            };
+    fetchCustomer();
+  }, [location.state?.customerId]);
+
+  /**
+   * Handles the change event for form inputs.
+   * Updates the form data based on the input name and value.
+   * If the changed input belongs to a sale item, it recalculates the total price.
+   * @param {Event} event - The change event
+   * @param {number} index - The index of the sale item (if applicable)
+   */
+  const handleChange = (event, index) => {
+    const { name, value } = event.target;
+    if (name === "productId" || name === "quantity" || name === "date" || name === "unitPrice" || name === "totalPrice") {
+      const sales = [...formData.sales];
+      sales[index] = {
+        ...sales[index],
+        [name]: value ?? 0,
+        totalPrice: name === "quantity" ? value * sales[index].unitPrice : sales[index].quantity * value,
+      };
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        sales,
+      }));
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        [name]: value,
+      }));
+    } 
+  };
+
+  /**
+   * Handles the form submission event.
+   * Validates the form data using the schema.
+   * Sends the updated customer data to the server for updating or creates a new customer.
+   * If the submission is successful, it navigates back to the main page with a success message.
+   * If there are validation errors or an API error occurs, it updates the errors state or logs the error to the console.
+   * @param {Event} event - The form submission event
+   */
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    // Disable submit button while submitting
+    setSubmitting(true);
+
+    try {
+      // Validate form data
+      await schema.validate(formData, { abortEarly: false });
+
+      // Send the customer data to the server for updating or creation
+      const response = location.state?.customerId
+        ? await updateCustomer(formData, location.state?.customerId)
+        : await createCustomer(formData);
+
+      // Handle the response from the server
+      if (response.ok) {
+        navigate("/", { state: { success: true } });
+      }
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        const validationErrors = {};
+        error.inner.forEach((err) => {
+          validationErrors[err.path] = err.message;
         });
-    };
+        setErrors(validationErrors);
+      }
+      setSubmitting(false);
+    }
+  };
 
-    const handleCancel = () => {
-        navigate("/");
-    };
+  /**
+   * Adds a new sale item to the form data.
+   * Sets the product ID of the new sale item to 0.
+   */
+  const handleAddSale = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      sales: [...prevFormData.sales, { productId: 0 }],
+    }));
+  };
 
-    return (
-        <div className={styles.roundedFormBorder}>
-            <Form onSubmit={handleSubmit}>
-                <Customer
-                    formData={formData}
-                    errors={errors}
-                    handleChange={handleChange}
-                />
+  /**
+   * Removes a sale item from the form data based on its index.
+   * @param {number} index - The index of the sale item to be removed
+   */
+  const handleRemoveSale = (index) => {
+    setFormData((prevFormData) => {
+      const sales = [...prevFormData.sales];
+      sales.splice(index, 1);
+      return {
+        ...prevFormData,
+        sales,
+      };
+    });
+  };
 
-                <Sale
-                    sales={formData.sales}
-                    products={products}
-                    errors={errors}
-                    submitting={submitting}
-                    handleChange={handleChange}
-                    handleAddSale={handleAddSale}
-                    handleRemoveSale={handleRemoveSale}
-                />
-                <div className={styles.topDivider}>
-                    <Button variant="primary" type="submit" disabled={submitting}>
-                        {submitting ? "Submitting..." : "Submit"}
-                    </Button>
-                    <Button variant="secondary" type="button" className={styles.leftDivider} onClick={handleCancel}>
-                        Cancel
-                    </Button>
-                </div>
-            </Form>
+  /**
+   * Handles the cancel button click event.
+   * Navigates back to the main page.
+   */
+  const handleCancel = () => {
+    navigate("/");
+  };
+
+  return (
+    <div className={styles.roundedFormBorder}>
+      <Form onSubmit={handleSubmit}>
+        {/* Render the customer form component */}
+        <Customer formData={formData} errors={errors} handleChange={handleChange} />
+
+        {/* Render the sale component */}
+        <Sale
+          sales={formData.sales}
+          products={products}
+          errors={errors}
+          submitting={submitting}
+          handleChange={handleChange}
+          handleAddSale={handleAddSale}
+          handleRemoveSale={handleRemoveSale}
+        />
+        <div className={styles.topDivider}>
+          {/* Submit button */}
+          <Button variant="primary" type="submit" disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit"}
+          </Button>
+          {/* Cancel button */}
+          <Button variant="secondary" type="button" className={styles.leftDivider} onClick={handleCancel}>
+            Cancel
+          </Button>
         </div>
-    );
+      </Form>
+    </div>
+  );
 }
 
 export default UpdateCustomer;

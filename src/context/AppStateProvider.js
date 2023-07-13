@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from "react";
 import AppStateContext from "../context/AppStateContext";
 import { getCustomers, fetchProducts } from "../services/index";
 
-// Define the initial state
+// Define the initial state for the application
 const initialState = {
     customers: null,
     products: null,
@@ -13,7 +13,7 @@ const initialState = {
     refreshCustomers: false
 };
 
-// Define a reducer function to update the state
+// Define the reducer function to handle state updates
 const reducer = (state, action) => {
     switch (action.type) {
         case "FETCH_START":
@@ -62,6 +62,7 @@ const reducer = (state, action) => {
     }
 };
 
+// Define the AppStateProvider component
 const AppStateProvider = ({ children }) => {
     const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -69,6 +70,7 @@ const AppStateProvider = ({ children }) => {
         const fetchInitialData = async () => {
             dispatch({ type: "FETCH_START" });
             try {
+                // Fetch initial data, such as products
                 const products = await fetchProducts();
                 dispatch({ type: "FETCH_PRODUCTS_SUCCESS", payload: products });
             } catch (error) {
@@ -76,11 +78,13 @@ const AppStateProvider = ({ children }) => {
             }
         };
 
+        // Fetch initial data when the component mounts
         fetchInitialData();
     }, []);
 
     useEffect(() => {
-        const fetchCustomers = async () => {            
+        const fetchCustomers = async () => {
+            // Fetch customers based on the current page and search text
             await getCustomers({
                 dispatch: dispatch,
                 currentPage: state.searchText ? 1 : state.currentPage,
@@ -88,13 +92,15 @@ const AppStateProvider = ({ children }) => {
             });
         };
 
+        // Fetch customers when the current page or search text changes
         fetchCustomers();
-    }, [state.currentPage, state.searchText]);    
-    
+    }, [state.currentPage, state.searchText]);
+
     useEffect(() => {
         const fetchCustomers = async () => {
+            // Fetch customers when the refreshCustomers flag is set
             if (!state.refreshCustomers) return;
-            
+
             await getCustomers({
                 dispatch: dispatch,
                 currentPage: state.searchText ? 1 : state.currentPage,
@@ -102,6 +108,7 @@ const AppStateProvider = ({ children }) => {
             });
         };
 
+        // Fetch customers when the refreshCustomers flag changes
         fetchCustomers();
     }, [state.refreshCustomers]);
 

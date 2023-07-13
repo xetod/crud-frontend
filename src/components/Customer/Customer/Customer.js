@@ -2,6 +2,13 @@ import React from "react";
 import { Form } from "react-bootstrap";
 import styles from "./Customer.module.css";
 
+/**
+ * Component for rendering the customer information section of the form.
+ * Displays form controls for entering customer details such as first name, last name, email, address, and phone number.
+ * @param {Object} formData - The object containing the form data
+ * @param {Object} errors - The object containing form validation errors
+ * @param {Function} handleChange - The function to handle form input changes
+ */
 function Customer({ formData, errors, handleChange }) {
     return (
         <div>

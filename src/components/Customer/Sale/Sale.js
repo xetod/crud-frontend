@@ -2,6 +2,18 @@ import React from "react";
 import { Form, Button, Col, Row } from "react-bootstrap";
 import styles from "./Sale.module.css";
 
+/**
+ * Component for rendering the sales section of the customer form.
+ * Displays a form group with fields for entering sales information.
+ * Provides functionality to add and remove sale items.
+ * @param {Object[]} sales - The array of sales items
+ * @param {Object[]} products - The array of available products
+ * @param {Object} errors - The object containing form validation errors
+ * @param {boolean} submitting - Flag indicating if the form is being submitted
+ * @param {Function} handleChange - The function to handle form input changes
+ * @param {Function} handleAddSale - The function to handle adding a new sale item
+ * @param {Function} handleRemoveSale - The function to handle removing a sale item
+ */
 function Sale({ sales, products, errors, submitting, handleChange, handleAddSale, handleRemoveSale }) {
   return (
     <div>
