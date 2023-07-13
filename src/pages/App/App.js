@@ -2,6 +2,7 @@ import { Route, Routes, BrowserRouter } from "react-router-dom";
 import Main from "../Main/Main";
 import AppStateProvider from "../../context/AppStateProvider";
 import NewCustomer from "../../components/Customer/NewCustomer/NewCustomer";
+import UpdateCustomer from "../../components/Customer/UpdateCustomer/UpdateCustomer";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
             {/* Define a route for the main component */}
             <Route exact path="/" element={<Main />} />
             <Route exact path="/new-customer" element={<NewCustomer />} />
+            <Route exact path="/update-customer" element={<UpdateCustomer />} />
           </Routes>
         </BrowserRouter>
       </AppStateProvider>

@@ -6,7 +6,7 @@ import Main from '../Main';
 
 const mockAppStateContextValue = {
     state: {}, 
-    getCustomers: jest.fn(),
+    fetchCustomers: jest.fn(),
 };
 
 test('renders GridOverview component', () => {
@@ -18,5 +18,6 @@ test('renders GridOverview component', () => {
         </AppStateContext.Provider>
     );
     const gridOverviewElement = screen.getByTestId('grid-overview');
+
     expect(gridOverviewElement).toBeInTheDocument();
 });
