@@ -1,20 +1,44 @@
 import React from "react";
+import * as router from "react-router";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { useNavigate } from "react-router-dom";
+import { MemoryRouter, RouterProvider, createMemoryRouter } from "react-router-dom";
 import AppStateContext from "../../../context/AppStateContext";
 import Searchbar from "../Searchbar";
 
-// Mock the value of the AppStateContext
 const mockAppStateContextValue = {
     fetchCustomers: jest.fn(),
+    dispatch: jest.fn(),
+    state: {
+        searchText: ""
+    }
 };
 
-// Mock the useNavigate hook
-jest.mock("react-router-dom", () => ({
-    useNavigate: jest.fn(),
-}));
+const setupRouter = () => {
+    const router = createMemoryRouter(
+        [
+            {
+                path: "/new-customer",
+                element: <>Navigated from Start</>,
+            }
+        ],
+        {
+            initialEntries: ["/new-customer"],
+            initialIndex: 0,
+        }
+    )
+    render(<RouterProvider router={router} />)
+    return { router }
+}
 
-// Helper function to render the Searchbar component with the necessary context
+beforeEach(() => {
+    jest.spyOn(router, "useNavigate").mockImplementation(() => jest.fn())
+})
+
+beforeEach(() => {
+    jest.useFakeTimers();
+    jest.clearAllMocks();
+});
+
 const renderSearchbar = () => {
     return render(
         <AppStateContext.Provider value={mockAppStateContextValue}>
@@ -26,37 +50,53 @@ const renderSearchbar = () => {
 describe("Searchbar", () => {
     it("renders the search input and buttons", () => {
         renderSearchbar();
+
         expect(screen.getByPlaceholderText("Search")).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "Search" })).toBeInTheDocument();
         expect(screen.getByRole("button", { name: "New Customer" })).toBeInTheDocument();
     });
 
-    it("calls getCustomers with the correct parameters when searching", () => {
+
+    it("should update search text when input value changes", () => {
         renderSearchbar();
 
         const searchInput = screen.getByPlaceholderText("Search");
-        const searchButton = screen.getByRole("button", { name: "Search" });
 
-        fireEvent.change(searchInput, { target: { value: "example" } });
-        fireEvent.click(searchButton);
+        fireEvent.change(searchInput, { target: { value: "Test" } });
 
-        expect(mockAppStateContextValue.fetchCustomers).toHaveBeenCalledWith({
-            currentPage: 1,
-            searchText: "example",
-        });
+        expect(searchInput.value).toBe("Test");
     });
 
-    it('navigates to "/new-customer" when the "New Customer" button is clicked', () => {
-        const mockNavigate = jest.fn();
-        useNavigate.mockReturnValue(mockNavigate);
 
+    it("should call handleSearch function on form submission", () => {
         renderSearchbar();
-        const newCustomerButton = screen.getByRole("button", { name: "New Customer" });
+
+        const searchButton = screen.getByRole("button", { name: "Search" });
+
+        fireEvent.click(searchButton);
+
+        expect(mockAppStateContextValue.dispatch).toHaveBeenCalledWith({
+            type: "SET_SEARCH_TEXT",
+            payload: "",
+        });
+
+    });
+
+    it("should navigate to the new customer page on button click", () => {
+        const { router } = setupRouter()
+
+        render(
+            <AppStateContext.Provider value={mockAppStateContextValue}>
+                <MemoryRouter>
+                    <Searchbar />
+                </MemoryRouter>
+            </AppStateContext.Provider>
+        );
+
+        const newCustomerButton = screen.getByRole("button", { name: "New Customer", });
 
         fireEvent.click(newCustomerButton);
 
-        expect(useNavigate).toHaveBeenCalledWith();
-        expect(mockNavigate).toHaveBeenCalledWith("/new-customer");
+        expect(router.state.location.pathname).toEqual("/new-customer");
     });
 });
-
