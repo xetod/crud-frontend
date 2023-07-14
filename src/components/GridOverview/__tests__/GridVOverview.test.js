@@ -47,7 +47,7 @@ describe("Grid Overview", () => {
 
     test("displays loading spinner when data is loading", () => {
         const state = {
-            fetchCustomers: jest.fn(),
+            dispatch: jest.fn(),
             state: {
                 loading: true
             }
@@ -68,7 +68,7 @@ describe("Grid Overview", () => {
 
     test("renders table when data is available", () => {
         const state = {
-            fetchCustomers: jest.fn(),
+            dispatch: jest.fn(),
             state: {
                 loading: false,
                 customers: {
@@ -97,7 +97,7 @@ describe("Grid Overview", () => {
 
     test("displays delete prompt modal when delete button is clicked", () => {
         const state = {
-            fetchCustomers: jest.fn(),
+            dispatch: jest.fn(),
             state: {
                 loading: false,
                 customers: {
@@ -129,7 +129,7 @@ describe("Grid Overview", () => {
 
     test("hides delete prompt modal when close button is clicked", async () => {
         const state = {
-            fetchCustomers: jest.fn(),
+            dispatch: jest.fn(),
             state: {
                 loading: false,
                 customers: {
@@ -165,7 +165,7 @@ describe("Grid Overview", () => {
         const { router } = setupRouter()
 
         const state = {
-            fetchCustomers: jest.fn(),
+            dispatch: jest.fn(),
             state: {
                 loading: false,
                 customers: {
@@ -196,7 +196,7 @@ describe("Grid Overview", () => {
  
     test("displays success alert when data is sent to server successfully", () => {
         const state = {
-            fetchCustomers: jest.fn(),
+            dispatch: jest.fn(),
             state: {
                 loading: false,
                 success: true,
