@@ -27,10 +27,12 @@ const GridOverview = () => {
     const alertMessage = location.state?.success
       ? "Data sent to server successfully."
       : saveAlert
-      ? saveAlert.message
-      : "";
+        ? saveAlert.message
+        : "";
 
     if (showAlertMessage) {
+      dispatch({ type: "REFRESH_CUSTOMERS", payload: true });
+
       setSaveAlert({ show: true, message: alertMessage });
 
       // Set a timer to hide the alert after 3 seconds
@@ -63,7 +65,7 @@ const GridOverview = () => {
       setSaveAlert({ show: true, message: "Customer was deleted successfully." });
       setDeletePrompt(false);
       dispatch({ type: "REFRESH_CUSTOMERS", payload: true });
-    } 
+    }
   };
 
   // Close the delete prompt modal
@@ -74,7 +76,7 @@ const GridOverview = () => {
     setDeleteCustomerId(customerId);
     setDeletePrompt(true);
   }
-
+  
   return (
     <div data-testid="grid-overview">
       <Modal show={deletePrompt} onHide={handleClosePrompt}>
